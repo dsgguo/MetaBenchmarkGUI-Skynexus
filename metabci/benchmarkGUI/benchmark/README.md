@@ -25,7 +25,6 @@ We will send you a copy of the handbook as soon as we receive your information.
   - [Installation](#installation)
   - [Who are we?](#who-are-we)
   - [What do we need?](#what-do-we-need)
-  - [Contributing](#contributing)
   - [License](#license)
   - [Contact](#contact)
   - [Acknowledgements](#acknowledgements)
@@ -98,8 +97,8 @@ The goal of the Meta-BCI is to make researchers focus on improving their own BCI
    ```
 3. Create an environment and activate it
    ```sh
-  conda create -n MetaBenchmark-GUI python=3.11.9
-  conda activate MetaBenchmark-GUI
+   conda create -n MetaBenchmark-GUI python=3.11.9
+   conda activate MetaBenchmark-GUI
    ```
 4. Install all requirements
    ```sh
@@ -110,11 +109,11 @@ The goal of the Meta-BCI is to make researchers focus on improving their own BCI
    pip install -e .
    ```
 6. Install the latest version of Benchopt
-  ```sh
-  pip install -U benchopt
-  # or latest development version
-  pip install git+https://github.com/benchopt/benchopt.git
-  ```
+   ```sh
+   pip install -U benchopt
+   # or latest development version
+   pip install git+https://github.com/benchopt/benchopt.git
+   ```
 ## Who are we?
 
 The MetaBenchmark-GUI project is carried out by researchers from 
@@ -129,15 +128,6 @@ We need expertise in programming, user experience, software sustainability, docu
 
 We'd love your feedback along the way.
 
-## Contributing
-
-Contributions are what make the open source community such an amazing place to be learn, inspire, and create. **Any contributions you make are greatly appreciated**. Especially welcome to submit BCI algorithms.
-
-1. Fork the Project
-2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the Branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
 
 ## License
 
@@ -145,7 +135,7 @@ Distributed under the GNU General Public License v2.0 License. See `LICENSE` for
 
 ## Contact
 
-Email: 
+Email: dsg@tju.edu.cn
 Email: he_jy02@163.com
 
 ## Acknowledgements
