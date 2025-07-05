@@ -134,7 +134,7 @@ class CE(BaseEstimator, TransformerMixin):
             self._save_model(filename)
         return estimator
 
-    def predict(self, data, duration, t_max=1, thre=-1.5 * 1e-3, filename=None):
+    def transform(self, data, duration, t_max=1, thre=-1.5 * 1e-3, filename=None):
         """
         Makes a decision based on the provided data and model.
 
@@ -157,6 +157,39 @@ class CE(BaseEstimator, TransformerMixin):
             estimator = self._get_model(duration)
             rhos = estimator.transform(data)
             label = estimator.predict(data)
+            rho_i = {i: rhos[i, :] for i, _ in enumerate(rhos)}
+            cost_h0, cost_hq = self._cross_entropy(rho_i)
+
+            if -cost_h0 * thre > -cost_hq or duration >= t_max:
+                return True, rhos
+            else:
+                return False, rhos
+        else:
+            raise ValueError(f"No model found for duration: {duration}")
+
+    def predict(self, data, duration, t_max=1, thre=-1.5 * 1e-3, filename=None):
+        """
+        Makes a decision based on the provided data and model.
+
+        Parameters:
+            data (array-like): Input data.
+            duration (float): Duration for which the model is used.
+            t_max (float): Maximum duration for the model.
+            thre (float, optional): Threshold for decision making. Defaults to -1.5*1e-3.
+            filename (str, optional): File name to load the model. Defaults to None.
+
+        Returns:
+            tuple: Decision (True/False) and predicted label.
+        """
+        if self.user_mode == 1 and filename is None:
+            raise ValueError("Filename must be provided when user_mode is 1")
+        elif self.user_mode == 1 and filename is not None:
+            self._load_model(filename)
+
+        if duration in self.model_dict:
+            estimator = self._get_model(duration)
+            rhos = estimator.transform(data)
+            label = estimator.classes_[np.argmax(rhos, axis=-1)]
             rho_i = {i: rhos[i, :] for i, _ in enumerate(rhos)}
             cost_h0, cost_hq = self._cross_entropy(rho_i)
 
