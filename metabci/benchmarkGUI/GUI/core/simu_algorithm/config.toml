@@ -1,0 +1,57 @@
+[eeg]
+srate = 250
+stim_interval = [0.14, 1.64]
+stim_labels = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16,
+                 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30]
+pick_chs = ["PZ", "PO5", "PO3", "POZ", "PO4", "PO6", "O1", "OZ", "O2"]
+
+[worker]
+word_file = "utils/LM/dictionary_txt/word_list.txt"
+
+[worker.word_dict]
+0 = "a"
+1 = "i"
+2 = "q"
+3 = "y"
+4 = "b"
+5 = "j"
+6 = "r"
+7 = "z"
+8 = "c"
+9 = "k"
+10 = "s"
+11 = " "
+12 = "d"
+13 = "l"
+14 = "t"
+15 = "e"
+16 = "m"
+17 = "u"
+18 = "f"
+19 = "n"
+20 = "v"
+21 = ","
+22 = "g"
+23 = "o"
+24 = "w"
+25 = "."
+26 = "h"
+27 = "p"
+28 = "x"
+29 = "Back"
+
+[worker.word_base_config]
+max_n = 14
+# the delete prob
+back_prob = 0.1
+# k means how fastly the model will believe the word model
+k = 0.8
+# t0 means when to believe the word model more than the EEG
+t0 = 5
+
+[neuroscan]
+device_address = "192.168.189.1:4000"
+num_chans = 64
+
+[marker]
+patch_size = 100
