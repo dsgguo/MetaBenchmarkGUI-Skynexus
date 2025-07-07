@@ -126,8 +126,8 @@ class AppInfoCard(SimpleCardWidget):
             parent: Parent widget
         """
         super().__init__(parent)
-        self.projectUrl = "https://github.com/dsgguo/MetaBenchmark-GUI"
-        
+        self.projectUrl = "https://github.com/dsgguo/MetaBenchmarkGUI-Skynexus"
+
         # Application icon
         self.iconLabel = ImageLabel(":/icon/MetaBCI", self)
         self.iconLabel.setBorderRadius(8, 8, 8, 8)
@@ -180,7 +180,7 @@ class AppInfoCard(SimpleCardWidget):
         self.hBoxLayout.setContentsMargins(34, 24, 24, 24)  
         self.hBoxLayout.addWidget(self.iconLabel)  
         self.hBoxLayout.addLayout(self.vBoxLayout)  
-        
+
         self.vBoxLayout.setContentsMargins(0, 0, 0, 0)  
         self.vBoxLayout.setSpacing(0)  
 
@@ -193,7 +193,7 @@ class AppInfoCard(SimpleCardWidget):
         # Company label - positioned below title
         self.vBoxLayout.addSpacing(3)  
         self.vBoxLayout.addWidget(self.companyLabel)  
-        
+
         # Description label - main text content
         self.vBoxLayout.addSpacing(20)  
         self.vBoxLayout.addWidget(self.descriptionLabel)  
@@ -224,7 +224,7 @@ class AppInfoCard(SimpleCardWidget):
         # Copy URL to system clipboard
         clipboard = QApplication.clipboard()
         clipboard.setText(self.projectUrl)
-        
+
         # Show success notification with teaching tip
         TeachingTip.create(
             target=self.shareButton,  
