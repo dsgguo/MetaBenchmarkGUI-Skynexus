@@ -83,7 +83,7 @@ class SimulationThread(QThread):
             self.output_queue.put("Starting to import simulation algorithm modules...")
             
             # Add simu_algorithm directory to Python path
-            simu_algorithm_path = Path(__file__).parent / "simu_algorithm"
+            simu_algorithm_path = Path(__file__).parent /"core" / "simu_algorithm" 
             if str(simu_algorithm_path) not in sys.path:
                 sys.path.insert(0, str(simu_algorithm_path))
             
