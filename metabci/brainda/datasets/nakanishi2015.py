@@ -1,72 +1,177 @@
 # -*- coding: utf-8 -*-
 #
 # Authors: Swolf <swolfforever@gmail.com>
-# Date: 2021/01/07
+# Date: 2020/12/30
 # License: MIT License
 """
-Nakanishi SSVEP dataset.
+Physionet MI.
 """
 from typing import Union, Optional, Dict, List, cast
 from pathlib import Path
 
 import numpy as np
-from mne import create_info
-from mne.io import RawArray, Raw
+from mne.io import Raw, read_raw_edf
 from mne.channels import make_standard_montage
+
 from .base import BaseDataset
 from ..utils.download import mne_data_path
 from ..utils.channels import upper_ch_names
-from ..utils.io import loadmat
 
-Nakanishi2015_URL = "https://github.com/mnakanishi/12JFPM_SSVEP/raw/master/data/"
+PHYSIONET_URL = "https://physionet.org/files/eegmmidb/1.0.0/"
 
 
-class Nakanishi2015(BaseDataset):
-    """SSVEP Nakanishi 2015 dataset
+class BasePhysionet(BaseDataset):
+    """Physionet Motor Imagery dataset.
 
-    This dataset contains 12-class joint frequency-phase modulated steady-state
-    visual evoked potentials (SSVEPs) acquired from 10 subjects used to
-    estimate an online performance of brain-computer interface (BCI) in the
-    reference study [1]_.
+    Physionet MI dataset: https://physionet.org/pn4/eegmmidb/
+
+    This data set consists of over 1500 one- and two-minute EEG recordings,
+    obtained from 109 volunteers.
+
+    Subjects performed different motor/imagery tasks while 64-channel EEG were
+    recorded using the BCI2000 system (http://www.bci2000.org).
+    Each subject performed 14 experimental runs: two one-minute baseline runs
+    (one with eyes open, one with eyes closed), and three two-minute runs of
+    each of the four following tasks:
+
+    1. A target appears on either the left or the right side of the screen.
+       The subject opens and closes the corresponding fist until the target
+       disappears. Then the subject relaxes.
+
+    2. A target appears on either the left or the right side of the screen.
+       The subject imagines opening and closing the corresponding fist until
+       the target disappears. Then the subject relaxes.
+
+    3. A target appears on either the top or the bottom of the screen.
+       The subject opens and closes either both fists (if the target is on top)
+       or both feet (if the target is on the bottom) until the target
+       disappears. Then the subject relaxes.
+
+    4. A target appears on either the top or the bottom of the screen.
+       The subject imagines opening and closing either both fists
+       (if the target is on top) or both feet (if the target is on the bottom)
+       until the target disappears. Then the subject relaxes.
+
+    parameters
+    ----------
+
+    imagined: bool (default True)
+        if True, return runs corresponding to motor imagination.
+
+    executed: bool (default False)
+        if True, return runs corresponding to motor execution.
 
     references
     ----------
-    .. [1] Masaki Nakanishi, Yijun Wang, Yu-Te Wang and Tzyy-Ping Jung,
-    "A Comparison Study of Canonical Correlation Analysis Based Methods for
-    Detecting Steady-State Visual Evoked Potentials," PLoS One, vol.10, no.10,
-    e140703, 2015.
-    http://journals.plos.org/plosone/article?id=10.1371/journal.pone.0140703
+
+    .. [1] Schalk, G., McFarland, D.J., Hinterberger, T., Birbaumer, N. and
+           Wolpaw, J.R., 2004. BCI2000: a general-purpose brain-computer
+           interface (BCI) system. IEEE Transactions on biomedical engineering,
+           51(6), pp.1034-1043.
+
+    .. [2] Goldberger, A.L., Amaral, L.A., Glass, L., Hausdorff, J.M., Ivanov,
+           P.C., Mark, R.G., Mietus, J.E., Moody, G.B., Peng, C.K., Stanley,
+           H.E. and PhysioBank, P., PhysioNet: components of a new research
+           resource for complex physiologic signals Circulation 2000 Volume
+           101 Issue 23 pp. E215–E220.
     """
 
-    _CHANNELS = ["PO7", "PO3", "POZ", "PO4", "PO8", "O1", "OZ", "O2"]
+    _EVENTS = {
+        "rest": (1, (0, 3)),
+        "left_hand": (2, (0, 3)),
+        "right_hand": (3, (0, 3)),
+        "hands": (4, (0, 3)),
+        "feet": (5, (0, 3)),
+    }
 
-    _FREQS = [
-        9.25,
-        11.25,
-        13.25,
-        9.75,
-        11.75,
-        13.75,
-        10.25,
-        12.25,
-        14.25,
-        10.75,
-        12.75,
-        14.75,
+    _CHANNELS = [
+        "FC5",
+        "FC3",
+        "FC1",
+        "FCZ",
+        "FC2",
+        "FC4",
+        "FC6",
+        "C5",
+        "C3",
+        "C1",
+        "CZ",
+        "C2",
+        "C4",
+        "C6",
+        "CP5",
+        "CP3",
+        "CP1",
+        "CPZ",
+        "CP2",
+        "CP4",
+        "CP6",
+        "FP1",
+        "FPZ",
+        "FP2",
+        "AF7",
+        "AF3",
+        "AFZ",
+        "AF4",
+        "AF8",
+        "F7",
+        "F5",
+        "F3",
+        "F1",
+        "FZ",
+        "F2",
+        "F4",
+        "F6",
+        "F8",
+        "FT7",
+        "FT8",
+        "T7",
+        "T8",
+        "T9",
+        "T10",
+        "TP7",
+        "TP8",
+        "P7",
+        "P5",
+        "P3",
+        "P1",
+        "PZ",
+        "P2",
+        "P4",
+        "P6",
+        "P8",
+        "PO7",
+        "PO3",
+        "POZ",
+        "PO4",
+        "PO8",
+        "O1",
+        "OZ",
+        "O2",
+        "IZ",
     ]
-    _PHASES = [0, 0, 0, 0.5, 0.5, 0.5, 1, 1, 1, 1.5, 1.5, 1.5]
 
-    _EVENTS = {str(freq): (i + 1, (0, 4)) for i, freq in enumerate(_FREQS)}
-
-    def __init__(self):
+    def __init__(self, paradigm: str, is_imagined: bool = True):
         super().__init__(
-            dataset_code="nakanishi2015",
-            subjects=list(range(1, 11)),
-            events=self._EVENTS,
+            dataset_code="eegbci",
+            subjects=list(range(1, 110)),
+            events=self._EVENTS,  # type: ignore
             channels=self._CHANNELS,
-            srate=256,
-            paradigm="ssvep",
+            srate=160,
+            paradigm=paradigm,
         )
+
+        self.is_imagined = is_imagined
+        self.baseline_runs = [1, 2]
+        self.feet_runs = []
+        self.hand_runs = []
+
+        if self.is_imagined:
+            self.feet_runs += [6, 10, 14]
+            self.hand_runs += [4, 8, 12]
+        else:
+            self.feet_runs += [5, 9, 13]
+            self.hand_runs += [3, 7, 11]
 
     def data_path(
         self,
@@ -81,57 +186,77 @@ class Nakanishi2015(BaseDataset):
             raise (ValueError("Invalid subject id"))
 
         subject = cast(int, subject)
-        url = "{:s}s{:d}.mat".format(Nakanishi2015_URL, subject)
-        file_dest = mne_data_path(
-            url,
-            self.dataset_code,
-            path=path,
-            proxies=proxies,
-            force_update=force_update,
-            update_path=update_path,
-        )
+        runs = self.baseline_runs + self.hand_runs + self.feet_runs
 
-        dests = [[file_dest]]
-        return dests
+        dests = []
+        for r in runs:
+            base_url = "{u}S{s:03d}/S{s:03d}R{r:02d}.edf".format(
+                u=PHYSIONET_URL, s=subject, r=r
+            )
+            dests.append(
+                mne_data_path(
+                    base_url,
+                    self.dataset_code,
+                    path=path,
+                    proxies=proxies,
+                    force_update=force_update,
+                    update_path=update_path,
+                )
+            )
+        return [dests]
 
     def _get_single_subject_data(
         self, subject: Union[str, int], verbose: Optional[Union[bool, str, int]] = None
     ) -> Dict[str, Dict[str, Raw]]:
+        dests = self.data_path(subject)
         montage = make_standard_montage("standard_1005")
         montage.rename_channels(
             {ch_name: ch_name.upper() for ch_name in montage.ch_names}
         )
         # montage.ch_names = [ch_name.upper() for ch_name in montage.ch_names]
 
-        dests = self.data_path(subject)
-        raw_mat = loadmat(dests[0][0])
-        n_samples, n_channels, n_trials = 1114, 8, 15
-        n_classes = 12
+        sess = dict()
+        for isess, run_dests in enumerate(dests):
+            runs = dict()
+            for irun, run_file in enumerate(run_dests):
+                raw = read_raw_edf(run_file, preload=True)
+                raw.rename_channels(lambda x: x.strip("."))
+                raw = upper_ch_names(raw)
+                raw.set_montage(montage)
 
-        data = np.transpose(raw_mat["eeg"], axes=(0, 3, 1, 2))
-        data = np.reshape(data, newshape=(-1, n_channels, n_samples))
-        data = data - data.mean(axis=2, keepdims=True)
-        raw_events = np.zeros((data.shape[0], 1, n_samples))
-        raw_events[:, 0, 38] = np.array(
-            [n_trials * [i + 1] for i in range(n_classes)]
-        ).flatten()
-        data = np.concatenate([1e-6 * data, raw_events], axis=1)
+                # change event id
+                ori_desc = np.copy(raw.annotations.description)
+                if irun == 0:
+                    raw.annotations.description[ori_desc == "T0"] = 6
+                    raw.annotations.description[ori_desc != "T0"] = 0
+                if irun == 1:
+                    raw.annotations.description[ori_desc == "T0"] = 7
+                    raw.annotations.description[ori_desc != "T0"] = 0
 
-        buff = (data.shape[0], n_channels + 1, 50)
-        data = np.concatenate([np.zeros(buff), data, np.zeros(buff)], axis=2)
-        ch_names = self._CHANNELS + ["stim"]
-        ch_types = ["eeg"] * len(self._CHANNELS) + ["stim"]
+                if irun in [2, 3, 4]:
+                    raw.annotations.description[ori_desc == "T0"] = 1
+                    raw.annotations.description[ori_desc == "T1"] = 2
+                    raw.annotations.description[ori_desc == "T2"] = 3
+                if irun in [5, 6, 7]:
+                    raw.annotations.description[ori_desc == "T0"] = 1
+                    raw.annotations.description[ori_desc == "T1"] = 4
+                    raw.annotations.description[ori_desc == "T2"] = 5
 
-        info = create_info(ch_names=ch_names, ch_types=ch_types, sfreq=self.srate)
-        raw = RawArray(data=np.concatenate(list(data), axis=1), info=info)
-        raw = upper_ch_names(raw)
-        raw.set_montage(montage)
-
-        sess = {"session_0": {"run_0": raw}}
+                runs["run_{:d}".format(irun)] = raw
+            sess["session_{:d}".format(isess)] = runs
         return sess
 
-    def get_freq(self, event: str):
-        return self._FREQS[self._EVENTS[event][0] - 1]
+    def raw_hook(self, raw: Raw, caches: dict, verbose=None):
+        # non-causal filtfilt
+        raw.filter(3, 40, l_trans_bandwidth=2, h_trans_bandwidth=5, phase="zero-double")
+        return raw, caches
 
-    def get_phase(self, event: str):
-        return self._PHASES[self._EVENTS[event][0] - 1]
+
+class PhysionetMI(BasePhysionet):
+    def __init__(self):
+        super().__init__("imagery", is_imagined=True)
+
+
+class PhysionetME(BasePhysionet):
+    def __init__(self):
+        super().__init__("movement", is_imagined=False)
