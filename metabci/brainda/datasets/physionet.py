@@ -17,7 +17,7 @@ from .base import BaseDataset
 from ..utils.download import mne_data_path
 from ..utils.channels import upper_ch_names
 
-PHYSIONET_URL = "http://www.physionet.org/pn4/eegmmidb/"
+PHYSIONET_URL = "https://physionet.org/files/eegmmidb/1.0.0/"
 
 
 class BasePhysionet(BaseDataset):
