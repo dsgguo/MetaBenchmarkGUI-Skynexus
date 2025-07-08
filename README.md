@@ -1,4 +1,5 @@
 # MetaBCI
+* This is the overview document of MetaBCI. For the overview document of MetaBenchmark GUI, please go to metaBCI/metabenchmark
 
 ## Welcome! 
 MetaBCI is an open-source platform for non-invasive brain computer interface. The project of MetaBCI is led by Prof. Minpeng Xu from Tianjin University, China. MetaBCI has 3 main parts:
@@ -25,6 +26,7 @@ And this open access paper can be found here: [MetaBCI](https://www.sciencedirec
 - [MetaBCI](#metabci)
   - [Welcome!](#welcome)
   - [Paper](#paper)
+  - [Content](#content)
   - [What are we doing?](#what-are-we-doing)
     - [The problem](#the-problem)
     - [The solution](#the-solution)
