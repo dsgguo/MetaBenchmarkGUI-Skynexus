@@ -114,6 +114,10 @@ The goal of the Meta-BCI is to make researchers focus on improving their own BCI
    # or latest development version
    pip install git+https://github.com/benchopt/benchopt.git
    ```
+7. Install the latest version of PySide6
+   ```sh
+   pip install "PySide6-Fluent-Widgets[full]" -i https://pypi.org/simple/
+   ```
 ## Who are we?
 
 The MetaBenchmark-GUI project is carried out by researchers from 
